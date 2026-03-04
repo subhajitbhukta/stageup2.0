@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StageUp – Empowering the Future Coders of India</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .marquee-track { animation: marquee 28s linear infinite; }
+    .marquee-track:hover { animation-play-state: paused; }
+
+    @keyframes cardHover {
+      0%   { transform: perspective(1000px) rotateX(0) rotateY(0) scale(1); }
+      100% { transform: perspective(1000px) rotateX(-5deg) rotateY(5deg) scale(1.05); }
+    }
+
+    @keyframes cardBurst {
+      0%   { transform: perspective(1000px) scale(1)    rotateZ(0deg);  box-shadow: 0 10px 30px rgba(255,107,53,0.2); }
+      25%  { transform: perspective(1000px) scale(1.12) rotateZ(2deg);  box-shadow: 0 20px 60px rgba(255,107,53,0.4); }
+      50%  { transform: perspective(1000px) scale(0.95) rotateZ(-1deg); box-shadow: 0 15px 45px rgba(255,107,53,0.3); }
+      75%  { transform: perspective(1000px) scale(1.05) rotateZ(1deg);  box-shadow: 0 18px 50px rgba(255,107,53,0.35); }
+      100% { transform: perspective(1000px) scale(1)    rotateZ(0deg);  box-shadow: 0 10px 30px rgba(255,107,53,0.2); }
+    }
+    @keyframes glowPulse {
+      0%, 100% { filter: brightness(1) drop-shadow(0 0 0px rgba(255,107,53,0)); }
+      50%       { filter: brightness(1.1) drop-shadow(0 0 20px rgba(255,107,53,0.6)); }
+    }
+
+    .hover-anim { transform-style: preserve-3d; will-change: transform; transition: all 300ms cubic-bezier(0.34,1.56,0.64,1); }
+    .hover-anim:hover { animation: cardHover 400ms cubic-bezier(0.34,1.56,0.64,1) forwards; }
+    .burst { animation: cardBurst 450ms cubic-bezier(0.34,1.56,0.64,1), glowPulse 450ms ease-out; }
+
+    @keyframes scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-33.333%); }
+    }
+    .animate-scroll { animation: scroll 40s linear infinite; }
+    .animate-scroll:hover { animation-play-state: paused; }
+
+    .fade-in { opacity: 0; transform: translateY(2rem); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    #app { opacity: 1; transition: opacity 0.7s ease; }
+    #app.fade-out { opacity: 0; }
+
+    #contactPopup { display: none; position: fixed; inset: 0; z-index: 9999; align-items: center; justify-content: center; }
+    #contactPopup.open { display: flex; }
+
+    @keyframes popIn {
+      0%   { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1);    opacity: 1; }
+    }
+    .popup-card { animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+    .wa-btn:hover   { box-shadow: 0 8px 30px rgba(37,211,102,0.35); }
+    .mail-btn:hover { box-shadow: 0 8px 30px rgba(255,107,53,0.35); }
+  </style>
+</head>
+<body>
+
+  <!-- CONTACT POPUP -->
+  <div id="contactPopup">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closePopup()"></div>
+    <div class="popup-card relative bg-white rounded-2xl shadow-2xl p-8 w-80 mx-4 border-2 border-orange-100">
+      <button onclick="closePopup()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition text-2xl font-bold leading-none">&times;</button>
+      <h2 class="text-xl font-semibold text-gray-900 mb-1 text-center">Get in Touch</h2>
+      <p class="text-gray-500 text-sm text-center mb-6">Choose how you'd like to reach us</p>
+      <a href="https://wa.me/919681456344" target="_blank"
+         class="wa-btn flex items-center gap-4 w-full bg-[#25D366] hover:bg-[#20bf5b] text-white rounded-xl px-5 py-4 mb-3 transition-all duration-200 font-medium" style="text-decoration:none;">
+        <svg class="w-7 h-7 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        <div>
+          <div class="text-base font-semibold">WhatsApp</div>
+          <div class="text-xs opacity-80">Chat with us instantly</div>
+        </div>
+      </a>
+      <a href="mailto:letsstageupnow@gmail.com"
+         class="mail-btn flex items-center gap-4 w-full bg-orange-500 hover:bg-orange-600 text-white rounded-xl px-5 py-4 transition-all duration-200 font-medium" style="text-decoration:none;">
+        <svg class="w-7 h-7 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        <div>
+          <div class="text-base font-semibold">Email Us</div>
+          <div class="text-xs opacity-80">letsstageupnow@gmail.com</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app" class="relative min-h-screen" style="background: linear-gradient(180deg, #fff5f0 0%, #ffe8dc 50%, #ffd4c0 100%);">
+
+    <!-- TOP MARQUEE BAR -->
+    <div class="relative z-50 bg-orange-500 text-white overflow-hidden" style="height:36px;">
+      <div class="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-orange-500 to-transparent z-10 pointer-events-none"></div>
+      <div class="absolute top-0 bottom-0 w-16  z-10 pointer-events-none" style="right:130px;"></div>
+      <div class="flex items-center h-full overflow-hidden" style="padding-right:130px;">
+        <div class="marquee-track flex items-center whitespace-nowrap text-xs font-medium" style="will-change:transform;">
+          <span class="inline-flex items-center gap-6 px-6">
+            <span class="flex items-center gap-1.5">&#128222; <span>+91 9804325454 , +91 8972502065</span></span>
+            <span class="opacity-50">|</span>
+            <span class="flex items-center gap-1.5">&#9993;&#65039; <span>letsstageupnow@gmail.com</span></span>
+            <span class="opacity-50">|</span>
+            <span class="flex items-center gap-1.5">&#128205; <span>Mankundu West Bengal, India</span></span>
+            <span class="opacity-50">|</span>
+            <span class="flex items-center gap-1.5">&#127760; <span>www.stageup.in</span></span>
+            <span class="opacity-50">|</span>
+            <span class="flex items-center gap-1.5">&#127891; <span>Empowering Future Coders of India</span></span>
+            <span class="opacity-50">|</span>
+            <span class="flex items-center gap-1.5">&#128640; <span>Enroll Now</span></span>
+            <span class="opacity-50">|</span>
+          </span>
+          <span class="inline-flex items-center gap-6 px-6">
+            <span class="flex items-center gap-1.5">&#128222; <span>+91 9804325454 , +91 8972502065</span></span>
+            <span class="opacity-50">|</span>
+            <span class="flex items-center gap-1.5">&#9993;&#65039; <span>letsstageupnow@gmail.com</span></span>
+            <span class="opacity-50">|</span>
+            <span class="flex items-center gap-1.5">&#128205; <span>Mankundu West Bengal, India</span></span>
+            <span class="opacity-50">|</span>
+            <span class="flex items-center gap-1.5">&#127760; <span>www.stageup.in</span></span>
+            <span class="opacity-50">|</span>
+            <span class="flex items-center gap-1.5">&#127891; <span>Empowering Future Coders of India</span></span>
+            <span class="opacity-50">|</span>
+            <span class="flex items-center gap-1.5">&#128640; <span>Enroll Now</span></span>
+            <span class="opacity-50">|</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Three.js Canvas -->
+    <canvas id="threeCanvas" class="fixed inset-0 z-0" style="height:70%; width:200%; top:36px;"></canvas>
+
+    <!-- Main Content -->
+    <div class="relative inset-0 z-50 flex flex-col transition-all duration-700">
+
+      <div class="relative z-10 w-full px-5 sm:px-6 mx-auto flex-1 flex flex-col justify-center py-2">
+
+        <!-- Header -->
+        <div class="relative text-center mb-12 transition-all duration-700 delay-100">
+
+          <!-- Certification Logos Top Right -->
+          <div class="sm:absolute sm:right-4 flex justify-center top-0 items-center gap-3">
+            <div class="w-14 h-14 rounded-full bg-white/90 backdrop-blur-sm border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg">
+              <img src="https://www.arenasolutions.com/wp-content/uploads/what-is-iso-9001-compliance.png" alt="ISO Certified" class="w-full h-full object-contain" title="ISO Certified" />
+            </div>
+            <div class="w-14 h-14 rounded-full overflow-hidden bg-white/90 backdrop-blur-sm border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg">
+              <img src="https://5.imimg.com/data5/SELLER/Default/2020/8/PQ/PG/RM/111471935/msme-registration-service-500x500.jpg" alt="MSME Certified" class="w-full h-full object-contain" title="MSME Certified" />
+            </div>
+            <div class="w-14 h-14 overflow-hidden rounded-full bg-white/90 backdrop-blur-sm border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg">
+              <img src="https://gowindinternational.com/wp-content/uploads/2025/05/DGFT.png" alt="DGFT Certified" class="w-full h-full object-contain" title="DGFT Certified" />
+            </div>
+            <div class="w-14 h-14 overflow-hidden rounded-full bg-white/90 backdrop-blur-sm border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcCrpzGPB9h0k5isIKYD23fFFP8u9CatVGA2c2-rmaTrDX5wRAjvfOMojrglo7PxSiduM&usqp=CAU" alt="NCS Accredited" class="w-full h-full object-contain" title="NCS Accredited" />
+            </div>
+          </div>
+
+          <h1 class="text-3xl md:text-5xl font-semibold text-gray-900 mb-3 mt-4 sm:mt-16 leading-tight tracking-tight">
+            StageUp – Empowering the Future Coders of India
+          </h1>
+          <p class="text-gray-600 text-lg md:text-xl mb-4 font-medium">
+            "From Curiosity to Career – A Complete Coding Journey"
+          </p>
+
+          <!-- Contact Us button below tagline -->
+          <button onclick="openPopup()"
+            class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-semibold text-sm px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all duration-200 mb-5 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            Contact Us
+          </button>
+
+          <div class="w-20 h-0.5 bg-gray-900 mx-auto"></div>
+        </div>
+
+        <!-- Platform Cards -->
+        <div id="cardsGrid" class="grid grid-cols-1 max-w-6xl mx-auto md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+
+          <!-- Kids StageUp -->
+          <div class="hover-anim card fade-in transition-all duration-500 opacity-0 translate-y-8" data-platform="kids" data-link="https://stageup.in/kids" style="transition-delay:0ms;">
+            <div class="relative bg-white/80 backdrop-blur-sm rounded-xl border-2 border-orange-200 p-8 transform transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl">
+              <div class="flex justify-center mb-6">
+                <div class="w-24 h-20 rounded-2xl bg-orange-50 flex items-center justify-center">
+                  <img src="./assets/kids.png" alt="" style="mix-blend-mode:multiply;" class="w-full h-full object-contain" />
+                </div>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-2 text-center">Kids StageUp</h3>
+              <p class="text-gray-600 text-sm text-center mb-6">Creative Learning for Young Minds</p>
+              <div class="flex justify-center">
+                <div class="inline-flex items-center gap-2 text-sm font-medium text-orange-700">Visit Platform <span>&#8594;</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- School StageUp -->
+          <div class="hover-anim card fade-in transition-all duration-500 opacity-0 translate-y-8" data-platform="school" data-link="https://stageup.in/kids/more_details.html" style="transition-delay:100ms;">
+            <div class="relative bg-white/80 backdrop-blur-sm rounded-xl border-2 border-orange-200 p-8 transform transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl">
+              <div class="flex justify-center mb-6">
+                <div class="w-24 h-20 rounded-2xl bg-orange-50 flex items-center justify-center">
+                  <img src="./assets/school.png" alt="" style="mix-blend-mode:multiply;" class="w-full h-full object-contain" />
+                </div>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-2 text-center">School StageUp</h3>
+              <p class="text-gray-600 text-sm text-center mb-6">Comprehensive School Education</p>
+              <div class="flex justify-center">
+                <div class="inline-flex items-center gap-2 text-sm font-medium text-orange-700">Visit Platform <span>&#8594;</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ADV StageUp -->
+          <div class="hover-anim card fade-in transition-all duration-500 opacity-0 translate-y-8" data-platform="adv" data-link="https://stageup.in/pro/" style="transition-delay:200ms;">
+            <div class="relative bg-white/80 backdrop-blur-sm rounded-xl border-2 border-orange-200 p-8 transform transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl">
+              <div class="flex justify-center mb-6">
+                <div class="w-24 h-20 rounded-2xl bg-orange-50 flex items-center justify-center">
+                  <img src="./assets/adv.png" alt="" style="mix-blend-mode:multiply;" class="w-full h-full object-contain" />
+                </div>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-2 text-center">ADV StageUp</h3>
+              <p class="text-gray-600 text-sm text-center mb-6">Advanced Skill Development Mastery</p>
+              <div class="flex justify-center">
+                <div class="inline-flex items-center gap-2 text-sm font-medium text-orange-700">Visit Platform <span>&#8594;</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pro StageUp -->
+          <div class="hover-anim card fade-in transition-all duration-500 opacity-0 translate-y-8" data-platform="pro" data-link="https://stageup.in/pro/" style="transition-delay:300ms;">
+            <div class="relative bg-white/80 backdrop-blur-sm rounded-xl border-2 border-orange-200 p-8 transform transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl">
+              <div class="flex justify-center mb-6">
+                <div class="w-24 h-20 rounded-2xl bg-orange-50 flex items-center justify-center">
+                  <img src="./assets/pro.png" alt="" style="mix-blend-mode:multiply;" class="w-full h-full object-contain" />
+                </div>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-2 text-center">Pro StageUp</h3>
+              <p class="text-gray-600 text-sm text-center mb-6">Professional Growth &amp; Development</p>
+              <div class="flex justify-center">
+                <div class="inline-flex items-center gap-2 text-sm font-medium text-orange-700">Visit Platform <span>&#8594;</span></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Scrolling Badges -->
+      <div id="badgesSection" class="relative z-10 py-6 border-t border-orange-200 bg-white/70 backdrop-blur-sm transition-all duration-700 delay-300 opacity-0">
+        <div class="w-full px-4">
+          <h3 class="text-center text-gray-500 text-sm font-medium mb-6 tracking-wider uppercase">We Are Supported By</h3>
+          <div class="relative overflow-hidden mb-2">
+            <div class="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white/70 to-transparent z-10"></div>
+            <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white/70 to-transparent z-10"></div>
+            <div class="flex animate-scroll" style="width:max-content;">
+              <!-- Set 1 -->
+              <div class="flex items-center gap-8 px-4">
+                <div class="flex-shrink-0 bg-white/90 backdrop-blur-sm rounded-xl px-8 py-5 border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 group min-w-[200px]">
+                  <img src="https://images.squarespace-cdn.com/content/v1/586fa54b6b8f5b0e75049b90/1591119029204-5XK9IQ794J82WFIMTF0D/google+for+ed.png" alt="Google for Education" class="h-12 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                </div>
+                <div class="flex-shrink-0 bg-white/90 backdrop-blur-sm rounded-xl px-8 py-5 border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 group min-w-[200px]">
+                  <img src="https://juniortech.org/wp-content/uploads/2020/09/Scratch-cat-logo-300x300px.png" alt="Scratch" class="h-12 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                </div>
+                <div class="flex-shrink-0 bg-white/90 backdrop-blur-sm rounded-xl px-8 py-5 border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 group min-w-[200px]">
+                  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTvzVXAptl-ucJ6LkNUjR3GWZQsYkJi2FJOl6aFzkzWdlA3hgsj0VXdkbpO1BabZtuhMcg&usqp=CAU" alt="CodePen" class="h-12 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                </div>
+                <div class="flex-shrink-0 bg-white/90 backdrop-blur-sm rounded-xl px-2 py-2 border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 group min-w-[200px]">
+                  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcReHxPC-DGRTX_9_vQFhQbAtNNV6ccTxgOnuQ&s" alt="Khan Academy" class="h-20 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                </div>
+              </div>
+              <!-- Set 2 -->
+              <div class="flex items-center gap-8 px-4">
+                <div class="flex-shrink-0 bg-white/90 backdrop-blur-sm rounded-xl px-8 py-5 border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 group min-w-[200px]">
+                  <img src="https://images.squarespace-cdn.com/content/v1/586fa54b6b8f5b0e75049b90/1591119029204-5XK9IQ794J82WFIMTF0D/google+for+ed.png" alt="Google for Education" class="h-12 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                </div>
+                <div class="flex-shrink-0 bg-white/90 backdrop-blur-sm rounded-xl px-8 py-5 border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 group min-w-[200px]">
+                  <img src="https://juniortech.org/wp-content/uploads/2020/09/Scratch-cat-logo-300x300px.png" alt="Scratch" class="h-12 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                </div>
+                <div class="flex-shrink-0 bg-white/90 backdrop-blur-sm rounded-xl px-8 py-5 border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 group min-w-[200px]">
+                  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTvzVXAptl-ucJ6LkNUjR3GWZQsYkJi2FJOl6aFzkzWdlA3hgsj0VXdkbpO1BabZtuhMcg&usqp=CAU" alt="CodePen" class="h-12 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                </div>
+                <div class="flex-shrink-0 bg-white/90 backdrop-blur-sm rounded-xl px-2 py-2 border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 group min-w-[200px]">
+                  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcReHxPC-DGRTX_9_vQFhQbAtNNV6ccTxgOnuQ&s" alt="Khan Academy" class="h-20 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                </div>
+              </div>
+              <!-- Set 3 -->
+              <div class="flex items-center gap-8 px-4">
+                <div class="flex-shrink-0 bg-white/90 backdrop-blur-sm rounded-xl px-8 py-5 border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 group min-w-[200px]">
+                  <img src="https://images.squarespace-cdn.com/content/v1/586fa54b6b8f5b0e75049b90/1591119029204-5XK9IQ794J82WFIMTF0D/google+for+ed.png" alt="Google for Education" class="h-12 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                </div>
+                <div class="flex-shrink-0 bg-white/90 backdrop-blur-sm rounded-xl px-8 py-5 border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 group min-w-[200px]">
+                  <img src="https://juniortech.org/wp-content/uploads/2020/09/Scratch-cat-logo-300x300px.png" alt="Scratch" class="h-12 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                </div>
+                <div class="flex-shrink-0 bg-white/90 backdrop-blur-sm rounded-xl px-8 py-5 border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 group min-w-[200px]">
+                  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTvzVXAptl-ucJ6LkNUjR3GWZQsYkJi2FJOl6aFzkzWdlA3hgsj0VXdkbpO1BabZtuhMcg&usqp=CAU" alt="CodePen" class="h-12 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                </div>
+                <div class="flex-shrink-0 bg-white/90 backdrop-blur-sm rounded-xl px-2 py-2 border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 group min-w-[200px]">
+                  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcReHxPC-DGRTX_9_vQFhQbAtNNV6ccTxgOnuQ&s" alt="Khan Academy" class="h-20 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="relative z-10 py-3 bg-white/70 backdrop-blur-sm border-t border-orange-200">
+        <p class="text-center text-gray-500 text-xs font-medium">&#169; 2025 StageUp. All rights reserved.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function openPopup()  { document.getElementById('contactPopup').classList.add('open'); }
+    function closePopup() { document.getElementById('contactPopup').classList.remove('open'); }
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePopup(); });
+
+    var phase = 'fade-in';
+    var selectedPlatform = null;
+    var mouse = { x: 0, y: 0 };
+
+    var canvas = document.getElementById('threeCanvas');
+    var scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0xffd4c0, 0.002);
+
+    var camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 0, 1);
+
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.setClearColor(0x000000, 0);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    var l1 = new THREE.PointLight(new THREE.Color(0xff6b35), 1.2, 120);
+    l1.position.set(-30, 20, 10); scene.add(l1);
+    var l2 = new THREE.PointLight(new THREE.Color(0xff9966), 0.8, 100);
+    l2.position.set(30, -10, 20); scene.add(l2);
+
+    var sGeo = new THREE.SphereGeometry(10, 32, 32);
+    var s1 = new THREE.Mesh(sGeo, new THREE.MeshBasicMaterial({ color: 0xff8c66, transparent: true, opacity: 0.12 }));
+    s1.position.set(-18, 6, -30); s1.scale.set(1.6, 1.0, 1); scene.add(s1);
+    var s2 = new THREE.Mesh(sGeo, new THREE.MeshBasicMaterial({ color: 0xffb088, transparent: true, opacity: 0.1 }));
+    s2.position.set(18, -6, -28); s2.scale.set(1.8, 1.2, 1); scene.add(s2);
+
+    var grid = new THREE.GridHelper(200, 40, 0xffccaa, 0xffe0cc);
+    grid.material.opacity = 0.15; grid.material.transparent = true;
+    grid.rotation.x = Math.PI / 2; grid.position.z = -40; scene.add(grid);
+
+    var codeSymbols = ['{ }', '< />', '()</>', 'if', 'fn', 'AI', 'const', 'let', 'react', 'node', 'C', 'JAVA', 'AI & ML', 'JS', 'CSS', 'HTML', '==', '!='];
+    var spriteElements = [];
+
+    codeSymbols.forEach(function(sym) {
+      var c = document.createElement('canvas');
+      c.width = 456; c.height = 256;
+      var ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, 456, 256);
+      ctx.font = 'bold 80px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      var g = ctx.createLinearGradient(0, 0, 456, 256);
+      g.addColorStop(0, 'rgba(255,107,53,1)');
+      g.addColorStop(1, 'rgba(255,153,102,1)');
+      ctx.shadowColor = 'rgba(255,107,53,0.45)';
+      ctx.shadowBlur = 18;
+      ctx.fillStyle = g;
+      ctx.fillText(sym, 228, 128);
+      var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, opacity: 0.95, depthWrite: false }));
+      var sc = 3.6 + Math.random() * 1.8;
+      sp.scale.set(sc, sc, 1);
+      sp.position.set((Math.random() - 0.5) * 36, (Math.random() - 0.5) * 20, -6 - Math.random() * 8);
+      sp.userData = { initialY: sp.position.y, floatSpeed: 0.6 + Math.random() * 0.9, sway: Math.random() * 0.4 };
+      spriteElements.push(sp);
+      scene.add(sp);
+    });
+
+    var eCount = 300;
+    var ePos = new Float32Array(eCount * 3);
+    var eVel = [];
+    for (var i = 0; i < eCount; i++) {
+      var side = i % 4;
+      var asp = window.innerWidth / window.innerHeight;
+      var vh = 2 * Math.tan((50 * Math.PI / 180) / 2) * 30;
+      var vw = vh * asp;
+      var x, y;
+      if (side === 0)      { x = -vw / 2 - 0.5; y = (Math.random() - 0.5) * vh * 1.2; }
+      else if (side === 1) { x =  vw / 2 + 0.5; y = (Math.random() - 0.5) * vh * 1.2; }
+      else if (side === 2) { x = (Math.random() - 0.5) * vw * 1.2; y =  vh / 2 + 0.5; }
+      else                 { x = (Math.random() - 0.5) * vw * 1.2; y = -vh / 2 - 0.5; }
+      ePos[i * 3] = x; ePos[i * 3 + 1] = y; ePos[i * 3 + 2] = (Math.random() - 0.5) * 5;
+      eVel.push({ side: side, initialX: x, initialY: y, floatSpeed: 0.3 + Math.random() * 0.5, floatOffset: Math.random() * Math.PI * 2 });
+    }
+    var ePGeo = new THREE.BufferGeometry();
+    ePGeo.setAttribute('position', new THREE.BufferAttribute(ePos, 3));
+    var eParts = new THREE.Points(ePGeo, new THREE.PointsMaterial({ size: 0.2, transparent: true, opacity: 0.95, color: 0xff8855, blending: THREE.AdditiveBlending }));
+    scene.add(eParts);
+
+    window.addEventListener('mousemove', function(e) {
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    });
+
+    var t = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      t += 0.008;
+      spriteElements.forEach(function(s, i) {
+        s.position.y = s.userData.initialY + Math.sin(t * s.userData.floatSpeed + i) * 1.4;
+        s.position.x += Math.sin(t * 0.4 + i) * 0.002 * s.userData.sway;
+        s.material.rotation = Math.sin(t * 0.3 + i) * 0.12;
+      });
+      var ep = eParts.geometry.attributes.position.array;
+      for (var i = 0; i < eCount; i++) {
+        var d = eVel[i];
+        if (d.side === 0 || d.side === 1) ep[i * 3 + 1] = d.initialY + Math.sin(t * d.floatSpeed + d.floatOffset) * 2;
+        else ep[i * 3] = d.initialX + Math.sin(t * d.floatSpeed + d.floatOffset) * 2;
+        ep[i * 3 + 2] += Math.sin(t * 0.5 + i) * 0.01;
+      }
+      eParts.geometry.attributes.position.needsUpdate = true;
+      camera.position.x += (mouse.x * 4 - camera.position.x) * 0.06;
+      camera.position.y += (mouse.y * 2 - camera.position.y) * 0.06;
+      camera.lookAt(0, 0, -10);
+      grid.position.x = Math.sin(t * 0.07) * 6;
+      grid.position.y = Math.cos(t * 0.05) * 3;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', function() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    var cards = document.querySelectorAll('.card');
+    cards.forEach(function(card, i) {
+      setTimeout(function() {
+        card.classList.add('visible');
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, i * 200 + 300);
+    });
+
+    setTimeout(function() { phase = 'showing'; }, 1500);
+    setTimeout(function() { document.getElementById('badgesSection').style.opacity = '1'; }, 600);
+
+    cards.forEach(function(card) {
+      card.addEventListener('click', function() {
+        if (phase !== 'showing') return;
+        var link = card.dataset.link;
+        var inner = card.querySelector('div');
+        inner.classList.add('burst');
+        setTimeout(function() { inner.classList.remove('burst'); }, 500);
+        if (link) { window.open(link.trim(), '_blank'); return; }
+        selectedPlatform = card.dataset.platform;
+        phase = 'selected';
+        cards.forEach(function(c) {
+          c.style.transform = c.dataset.platform === selectedPlatform ? 'scale(1.05)' : 'scale(0.95)';
+          if (c.dataset.platform !== selectedPlatform) c.style.opacity = '0.5';
+        });
+        setTimeout(function() { document.getElementById('app').classList.add('fade-out'); }, 800);
+      });
+    });
+  </script>
+</body>
+</html>
